@@ -1,0 +1,305 @@
+/* =====================================================================
+   estilos.css — Aspecto de Travel Planer
+   Secciones: variables, base, formulario, autocompletado, estados,
+   tarjeta del país, plan de destinos, avisos (toasts) y responsive.
+   ===================================================================== */
+
+/* Variables de color: se usan como var(--nombre) en todo el archivo.
+   Cambiar un valor aquí cambia el color en toda la página. */
+:root {
+  --azul: #2563eb;
+  --azul-oscuro: #1e3a8a;
+  --fondo: #eef2f7;
+  --borde: #d5dde8;
+  --texto: #0f172a;
+  --gris: #64748b;
+  --rojo: #b91c1c;
+  --verde: #15803d;
+  --sombra: 0 4px 18px rgba(15, 23, 42, .08);
+}
+
+/* Base: el ancho de cada elemento incluye su relleno y borde (más fácil de calcular) */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  line-height: 1.5;
+}
+
+/* Encabezado con degradado */
+.cabecera {
+  background: linear-gradient(135deg, #1e3a8a, #2563eb 60%, #0891b2);
+  color: #fff;
+  text-align: center;
+  padding: 2rem 1rem 3rem;
+}
+.cabecera h1 { margin: 0; font-size: 2.2rem; }
+.cabecera p { margin: .25rem 0 0; opacity: .9; }
+
+/* Diseño principal: dos columnas (buscador | plan). En móvil pasa a una (ver @media) */
+.contenedor {
+  max-width: 1150px;
+  margin: -1.8rem auto 1.5rem;
+  padding: 0 1rem;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* Tarjeta blanca que contiene cada sección */
+.panel {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: 16px;
+  padding: 1.4rem;
+  box-shadow: var(--sombra);
+}
+.panel h2 { margin: 0 0 1rem; color: var(--azul-oscuro); font-size: 1.3rem; }
+.panel h3 { margin: 1.2rem 0 .5rem; }
+.titulo-plan { display: flex; justify-content: space-between; align-items: center; }
+
+label { display: block; font-weight: 600; margin-bottom: .3rem; font-size: .92rem; }
+
+.fila { display: flex; gap: .5rem; }
+
+/* Campos de texto y número */
+input[type="text"], input[type="number"] {
+  width: 100%;
+  padding: .65rem .8rem;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  font-size: 1rem;
+  background: #fff;
+  transition: border-color .15s, box-shadow .15s;
+}
+input:focus { outline: none; border-color: var(--azul); box-shadow: 0 0 0 3px rgba(37, 99, 235, .2); }
+/* Clase que pone app.js cuando un dato no es válido */
+input.invalido { border-color: var(--rojo); background: #fef2f2; }
+
+/* Botones: estilo base y variantes (.secundario, .pequeno, .grande) */
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  padding: .65rem 1.1rem;
+  font-size: 1rem;
+  background: var(--azul);
+  color: #fff;
+  transition: background .15s, transform .1s;
+}
+button:hover:not(:disabled) { background: var(--azul-oscuro); }
+button:active:not(:disabled) { transform: scale(.97); }
+button:disabled { opacity: .6; cursor: not-allowed; }
+button.secundario { background: #e2e8f0; color: var(--texto); }
+button.secundario:hover:not(:disabled) { background: #cbd5e1; }
+button.pequeno { padding: .35rem .8rem; font-size: .85rem; }
+button.grande { width: 100%; padding: .8rem; font-size: 1.05rem; font-weight: 600; }
+#btn-buscar { white-space: nowrap; }
+
+/* Mensaje de validación bajo el buscador */
+.error-campo { color: var(--rojo); min-height: 1.2em; margin: .35rem 0 0; font-size: .9rem; }
+
+/* Autocompletado */
+.autocompletar { position: relative; flex: 1; }
+.sugerencias {
+  position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px);
+  margin: 0; padding: .25rem; list-style: none;
+  background: #fff; border: 1px solid var(--borde); border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, .15);
+}
+.sugerencias li {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .45rem .6rem; border-radius: 8px; cursor: pointer;
+}
+.sugerencias li img { width: 28px; height: 20px; object-fit: cover; border-radius: 3px; }
+.sugerencias li small { color: var(--gris); margin-left: auto; }
+.sugerencias li:hover, .sugerencias li.activa { background: #e0ecff; }
+
+/* Ejemplos */
+.ejemplos { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin-top: .4rem; color: var(--gris); font-size: .9rem; }
+.chip-ejemplo {
+  background: #f1f5f9; color: var(--texto); border: 1px solid var(--borde);
+  border-radius: 999px; padding: .25rem .75rem; font-size: .9rem;
+}
+.chip-ejemplo:hover:not(:disabled) { background: #dbeafe; }
+
+/* Estados */
+/* Recuadro de estado: vacío, cargando (con spinner) y error.
+   app.js cambia la clase: estado-vacio / estado-cargando / estado-error / estado-ok */
+.estado { margin: 1rem 0; padding: .9rem 1rem; border-radius: 10px; border: 1px dashed var(--borde); }
+.estado-vacio { color: var(--gris); background: #f8fafc; }
+.estado-cargando { color: var(--azul-oscuro); background: #eff6ff; border-color: #bfdbfe; }
+.estado-cargando::before {
+  content: "";
+  display: inline-block;
+  width: 1em; height: 1em;
+  margin-right: .5rem;
+  vertical-align: -.15em;
+  border: 2px solid #93c5fd;
+  border-top-color: var(--azul);
+  border-radius: 50%;
+  animation: giro .8s linear infinite;
+}
+.estado-error { color: var(--rojo); background: #fef2f2; border-color: #fecaca; animation: sacudir .35s; }
+.estado-ok { display: none; }
+/* Animaciones: giro = spinner de carga, sacudir = error */
+@keyframes giro { to { transform: rotate(360deg); } }
+@keyframes sacudir { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+/* Tarjeta de país */
+.tarjeta-pais {
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-top: 1rem;
+  background: #fff;
+}
+.tarjeta-pais.aparece { animation: aparece .4s ease; }
+@keyframes aparece { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+/* Foto grande del país (la imagen se pone desde JS con background-image) */
+.hero {
+  position: relative;
+  height: 250px;
+  background-size: cover;
+  background-position: center;
+  background-color: #cbd5e1;
+  transition: background-image .3s;
+}
+.hero-velo { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.05) 60%); }
+.hero-texto { position: absolute; left: 1rem; right: 1rem; bottom: .9rem; display: flex; align-items: center; gap: .8rem; color: #fff; }
+.hero-texto h3 { margin: 0; font-size: 1.8rem; text-shadow: 0 2px 6px rgba(0,0,0,.5); }
+.hero-texto span { font-size: .85rem; opacity: .9; }
+.mini-bandera { width: 54px; height: 36px; object-fit: cover; border-radius: 5px; border: 2px solid #fff; }
+
+/* Tira de miniaturas: al hacer clic cambian la foto principal */
+.galeria { display: flex; gap: .4rem; padding: .5rem; overflow-x: auto; background: #f1f5f9; }
+.galeria img {
+  height: 58px; width: 86px; object-fit: cover; border-radius: 8px; flex: none;
+  cursor: pointer; opacity: .65; border: 2px solid transparent; transition: opacity .15s, transform .15s;
+}
+.galeria img:hover { opacity: 1; transform: translateY(-2px); }
+.galeria img.activa { opacity: 1; border-color: var(--azul); }
+
+.tarjeta-cuerpo { padding: 1rem; }
+.descripcion {
+  margin: 0 0 1rem; color: #334155; font-size: .95rem;
+  display: -webkit-box; -webkit-line-clamp: 4; line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+}
+/* "Esqueleto" gris animado que se ve mientras llega la descripción */
+.esqueleto {
+  display: block; height: .8rem; margin-bottom: .4rem; border-radius: 6px;
+  background: linear-gradient(90deg, #e2e8f0, #f1f5f9, #e2e8f0); background-size: 200% 100%;
+  animation: brillo 1.2s infinite;
+}
+.esqueleto.corto { width: 60%; }
+@keyframes brillo { to { background-position: -200% 0; } }
+
+/* Cuadrícula de datos del país: capital, región, población, moneda, idioma, área */
+.datos { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; margin-bottom: 1rem; }
+.dato {
+  background: #f8fafc; border: 1px solid var(--borde); border-radius: 10px;
+  padding: .55rem .6rem; display: flex; flex-direction: column; min-width: 0;
+}
+.dato span { font-size: 1.2rem; }
+.dato small { color: var(--gris); }
+.dato b { font-size: .9rem; overflow-wrap: anywhere; }
+
+/* Países relacionados (botones con bandera) */
+.relacionados { display: flex; flex-wrap: wrap; gap: .5rem; }
+.chip {
+  display: flex; align-items: center; gap: .4rem;
+  padding: .3rem .8rem .3rem .3rem;
+  background: #f8fafc;
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  font-size: .9rem;
+  color: var(--texto);
+}
+.chip:hover:not(:disabled) { background: #dbeafe; transform: translateY(-2px); }
+.chip img { width: 28px; height: 20px; object-fit: cover; border-radius: 3px; }
+
+/* Plan */
+.lista-destinos { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+/* Tarjeta de cada destino del plan. --color lo asigna app.js (borde superior) */
+.destino {
+  border: 1px solid var(--borde);
+  border-top: 4px solid var(--color, var(--azul));
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  transition: opacity .25s, transform .25s;
+}
+.destino.nuevo { animation: aparece .45s ease; }
+/* Clase temporal: animación al eliminar un destino */
+.destino.saliendo { opacity: 0; transform: translateX(40px); }
+.destino-foto {
+  position: relative; height: 110px; background-size: cover; background-position: center; background-color: #cbd5e1;
+}
+.destino-titulo { position: absolute; left: .8rem; bottom: .6rem; display: flex; align-items: center; gap: .6rem; color: #fff; }
+.destino-titulo img { width: 40px; height: 27px; object-fit: cover; border-radius: 4px; border: 2px solid #fff; }
+.destino-titulo strong { display: block; font-size: 1.1rem; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
+.destino-titulo small { opacity: .9; font-size: .78rem; }
+.eliminar {
+  position: absolute; top: .5rem; right: .5rem; width: 32px; height: 32px; padding: 0;
+  border-radius: 50%; background: rgba(0,0,0,.55); font-size: .9rem;
+}
+.eliminar:hover:not(:disabled) { background: var(--rojo); }
+
+.campos { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; padding: .8rem .8rem 0; }
+/* Control − [número] +  para días y presupuesto diario */
+.stepper { display: flex; }
+.stepper input { text-align: center; border-radius: 0; min-width: 0; -moz-appearance: textfield; appearance: textfield; }
+.stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.stepper button { background: #e2e8f0; color: var(--texto); padding: 0 .85rem; font-size: 1.2rem; }
+.stepper button:hover:not(:disabled) { background: #cbd5e1; }
+.stepper .menos { border-radius: 10px 0 0 10px; }
+.stepper .mas { border-radius: 0 10px 10px 0; }
+.destino-total { margin: .7rem .8rem .8rem; padding: .5rem .7rem; background: #f0fdf4; border-radius: 8px; color: var(--verde); }
+
+/* Resumen del plan: totales y barra de reparto del presupuesto */
+.resumen {
+  margin-top: 1.2rem;
+  padding: 1rem 1.1rem;
+  background: linear-gradient(135deg, #eff6ff, #ecfeff);
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+}
+.resumen-datos { display: flex; gap: 1.5rem; color: var(--gris); }
+.resumen-datos strong { color: var(--texto); margin-left: .3rem; }
+.gran-total { margin: .4rem 0 .8rem; color: var(--azul-oscuro); }
+.gran-total strong { display: block; font-size: 2rem; line-height: 1.2; }
+.barra-reparto { display: flex; height: 12px; border-radius: 999px; overflow: hidden; background: #e2e8f0; }
+.barra-reparto span { transition: width .4s; }
+.leyenda-reparto { display: flex; flex-wrap: wrap; gap: .3rem 1rem; margin-top: .5rem; font-size: .82rem; color: var(--gris); }
+.leyenda-reparto i { display: inline-block; width: .7rem; height: .7rem; border-radius: 50%; margin-right: .3rem; }
+
+/* Toasts */
+.toasts { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); display: grid; gap: .5rem; z-index: 50; width: max-content; max-width: 92vw; }
+.toast {
+  display: flex; align-items: center; gap: 1rem;
+  background: #0f172a; color: #fff; padding: .7rem 1rem; border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3); animation: aparece .3s ease;
+}
+.toast.salida { opacity: 0; transition: opacity .35s; }
+.toast button { background: transparent; color: #93c5fd; padding: .1rem .4rem; font-weight: 700; }
+.toast button:hover:not(:disabled) { background: rgba(255,255,255,.1); }
+
+.pie { text-align: center; color: var(--gris); padding: 1rem; font-size: .9rem; }
+
+/* Garantiza que el atributo hidden de HTML siempre oculte el elemento */
+[hidden] { display: none !important; }
+
+/* Responsive: pantallas medianas y pequeñas */
+@media (max-width: 860px) {
+  .contenedor { grid-template-columns: 1fr; }
+}
+@media (max-width: 520px) {
+  .datos { grid-template-columns: 1fr 1fr; }
+  .campos { grid-template-columns: 1fr; }
+  .hero { height: 200px; }
+}

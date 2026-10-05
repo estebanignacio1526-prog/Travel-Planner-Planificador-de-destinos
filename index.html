@@ -1,0 +1,187 @@
+<!--
+  Travel Planner — estructura de la página (HTML).
+  - Aquí está TODO el HTML: la página y también las plantillas (<template>) al final.
+  - El estilo está en css/estilos.css y la lógica en js/*.js.
+  - Los elementos con id="..." son los que app.js busca con getElementById.
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Planner — Planificador académico de destinos</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <!-- Encabezado -->
+  <header class="cabecera">
+    <h1>🌍 Travel Planner</h1>
+    <p>Descubre países y planifica tu próximo viaje académico</p>
+  </header>
+
+  <!-- Contenido principal: dos paneles (buscar país | plan de destinos) -->
+  <main class="contenedor">
+    <!-- PANEL 1: búsqueda y datos del país -->
+    <section class="panel" aria-labelledby="titulo-busqueda">
+      <h2 id="titulo-busqueda">1. Explora un país</h2>
+      <!-- Formulario: app.js escucha su evento "submit" (RF01) -->
+      <form id="form-busqueda" novalidate autocomplete="off">
+        <label for="input-pais">Nombre del país (en español o inglés)</label>
+        <div class="fila">
+          <div class="autocompletar">
+            <input type="text" id="input-pais" placeholder="Ej: Japón, Spain, Chile…" role="combobox" aria-expanded="false" aria-controls="sugerencias">
+            <!-- Lista del autocompletado: JS la llena con <template id="tpl-sugerencia"> -->
+            <ul id="sugerencias" class="sugerencias" role="listbox" hidden></ul>
+          </div>
+          <button type="submit" id="btn-buscar">🔍 Buscar</button>
+        </div>
+        <p id="error-validacion" class="error-campo" role="alert"></p>
+      </form>
+
+      <!-- Atajos: data-pais guarda el país que se buscará al hacer clic -->
+      <div class="ejemplos">
+        <span>Prueba con:</span>
+        <button type="button" class="chip-ejemplo" data-pais="Japón">🇯🇵 Japón</button>
+        <button type="button" class="chip-ejemplo" data-pais="Italia">🇮🇹 Italia</button>
+        <button type="button" class="chip-ejemplo" data-pais="Perú">🇵🇪 Perú</button>
+        <button type="button" class="chip-ejemplo" data-pais="Canadá">🇨🇦 Canadá</button>
+        <button type="button" class="chip-ejemplo" data-pais="Egipto">🇪🇬 Egipto</button>
+        <button type="button" class="chip-ejemplo" id="btn-azar">🎲 Sorpréndeme</button>
+      </div>
+
+      <!-- Estados de búsqueda: vacío, cargando y error (los cambia app.js) -->
+      <div id="estado" class="estado estado-vacio" aria-live="polite">
+        ✈️ Escribe el nombre de un país para comenzar.
+      </div>
+
+      <!-- Tarjeta del país: JS la llena con <template id="tpl-pais"> -->
+      <article id="resultado" class="tarjeta-pais" hidden></article>
+
+      <!-- Países relacionados (vecinos) -->
+      <div id="relacionados-bloque" hidden>
+        <h3>Países relacionados</h3>
+        <div id="relacionados" class="relacionados"></div>
+      </div>
+    </section>
+
+    <!-- PANEL 2: plan de destinos y presupuesto (RF04 a RF07) -->
+    <section class="panel" aria-labelledby="titulo-plan">
+      <div class="titulo-plan">
+        <h2 id="titulo-plan">2. Tu plan de destinos</h2>
+        <button type="button" id="btn-limpiar" class="secundario pequeno" hidden>Vaciar plan</button>
+      </div>
+      <!-- Estado "vacío" del plan: se oculta cuando hay destinos -->
+      <div id="plan-vacio" class="estado estado-vacio">
+        🧳 Aún no has agregado destinos. Busca un país y pulsa «Agregar al plan».
+      </div>
+      <!-- Lista de destinos: JS agrega un <li> por destino (<template id="tpl-destino">) -->
+      <ul id="lista-destinos" class="lista-destinos"></ul>
+
+      <!-- Resumen del presupuesto total (RF06) -->
+      <div class="resumen" id="resumen" hidden>
+        <div class="resumen-datos">
+          <span>Destinos <strong id="total-destinos">0</strong></span>
+          <span>Días totales <strong id="total-dias">0</strong></span>
+        </div>
+        <div class="gran-total">Presupuesto total estimado <strong id="total-general">$0.00</strong></div>
+        <div id="barra-reparto" class="barra-reparto" aria-label="Reparto del presupuesto por destino"></div>
+        <div id="leyenda-reparto" class="leyenda-reparto"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Contenedor de avisos temporales ("Agregado", "Deshacer"...) -->
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <!-- Créditos de las fuentes de datos -->
+  <footer class="pie">Datos: <a href="https://github.com/mledoze/countries" target="_blank" rel="noopener">mledoze/countries</a> (base de REST Countries) · Población: <a href="https://data.worldbank.org" target="_blank" rel="noopener">Banco Mundial</a> · Fotos: <a href="https://es.wikipedia.org" target="_blank" rel="noopener">Wikipedia / Wikimedia Commons</a></footer>
+
+  <!-- =================== PLANTILLAS ===================
+       Un <template> no se muestra: es un molde. app.js lo copia (clonar()) y
+       rellena los elementos que tienen data-campo="..." con rellenar().
+       Así el HTML queda en este archivo y JavaScript solo pone los datos. -->
+  <!-- Una fila del autocompletado -->
+  <template id="tpl-sugerencia">
+    <li role="option"><img src="" alt=""><span data-campo="espanol"></span><small data-campo="ingles"></small></li>
+  </template>
+
+  <!-- Tarjeta completa del país: foto, galería, descripción, datos y botón agregar -->
+  <template id="tpl-pais">
+    <div class="hero" id="hero">
+      <div class="hero-velo"></div>
+      <div class="hero-texto">
+        <img class="mini-bandera" data-campo="bandera" src="" alt="">
+        <div><h3 data-campo="nombre"></h3><span data-campo="oficial"></span></div>
+      </div>
+    </div>
+    <div class="galeria" id="galeria" hidden></div>
+    <div class="tarjeta-cuerpo">
+      <p class="descripcion" id="descripcion"><span class="esqueleto"></span><span class="esqueleto corto"></span></p>
+      <div class="datos">
+        <div class="dato"><span>🏛️</span><small>Capital</small><b data-campo="capital"></b></div>
+        <div class="dato"><span>🗺️</span><small>Región</small><b data-campo="region"></b></div>
+        <div class="dato"><span>👥</span><small>Población</small><b data-campo="poblacion"></b></div>
+        <div class="dato"><span>💱</span><small>Moneda</small><b data-campo="moneda"></b></div>
+        <div class="dato"><span>🗣️</span><small>Idiomas</small><b data-campo="idiomas"></b></div>
+        <div class="dato"><span>📐</span><small>Área</small><b data-campo="area"></b></div>
+      </div>
+      <button type="button" id="btn-agregar" class="grande"></button>
+    </div>
+  </template>
+
+  <!-- Botón de país relacionado -->
+  <template id="tpl-chip">
+    <button type="button" class="chip"><img src="" alt=""><span data-campo="nombre"></span></button>
+  </template>
+
+  <!-- Un destino del plan: foto, días, presupuesto diario y total -->
+  <template id="tpl-destino">
+    <li class="destino">
+      <div class="destino-foto">
+        <div class="hero-velo"></div>
+        <div class="destino-titulo">
+          <img data-campo="bandera" src="" alt="">
+          <div><strong data-campo="nombre"></strong><small data-campo="detalle"></small></div>
+        </div>
+        <button type="button" class="eliminar" title="Eliminar">✕</button>
+      </div>
+      <div class="campos">
+        <div class="campo">
+          <label>📅 Días de viaje</label>
+          <div class="stepper">
+            <button type="button" class="menos" aria-label="Menos días">−</button>
+            <input type="number" class="in-dias" min="1" max="365" step="1">
+            <button type="button" class="mas" aria-label="Más días">+</button>
+          </div>
+        </div>
+        <div class="campo">
+          <label>💵 Presupuesto diario ($)</label>
+          <div class="stepper">
+            <button type="button" class="menos" aria-label="Menos presupuesto">−</button>
+            <input type="number" class="in-diario" min="0" step="5">
+            <button type="button" class="mas" aria-label="Más presupuesto">+</button>
+          </div>
+        </div>
+      </div>
+      <p class="destino-total"><span data-campo="calculo"></span> <strong data-campo="total"></strong></p>
+    </li>
+  </template>
+
+  <!-- Tramo de color de la barra de reparto, y su leyenda -->
+  <template id="tpl-segmento"><span></span></template>
+  <template id="tpl-leyenda"><span><i></i><span data-campo="texto"></span></span></template>
+
+  <!-- Aviso temporal (el botón solo se muestra si tiene acción, p. ej. "Deshacer") -->
+  <template id="tpl-toast">
+    <div class="toast"><span data-campo="mensaje"></span><button type="button" hidden></button></div>
+  </template>
+
+  <!-- Scripts (el orden importa: app.js usa funciones de los otros dos) -->
+  <!-- api.js: fetch y promesas (datos externos) -->
+  <script src="js/api.js"></script>
+  <!-- presupuesto.js: fórmulas del presupuesto -->
+  <script src="js/presupuesto.js"></script>
+  <!-- app.js: eventos y actualización del DOM -->
+  <script src="js/app.js"></script>
+</body>
+</html>
