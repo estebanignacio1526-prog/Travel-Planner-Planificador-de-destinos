@@ -250,10 +250,10 @@ button.grande { width: 100%; padding: .8rem; font-size: 1.05rem; font-weight: 60
 }
 .eliminar:hover:not(:disabled) { background: var(--rojo); }
 
-.campos { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; padding: .8rem .8rem 0; }
+.campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .8rem; padding: .8rem .8rem 0; }
 /* Control − [número] +  para días y presupuesto diario */
 .stepper { display: flex; }
-.stepper input { text-align: center; border-radius: 0; min-width: 0; -moz-appearance: textfield; appearance: textfield; }
+.stepper input { text-align: center; border-radius: 0; min-width: 4.5ch; flex: 1; padding-left: .3rem; padding-right: .3rem; -moz-appearance: textfield; appearance: textfield; }
 .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .stepper button { background: #e2e8f0; color: var(--texto); padding: 0 .85rem; font-size: 1.2rem; }
 .stepper button:hover:not(:disabled) { background: #cbd5e1; }
